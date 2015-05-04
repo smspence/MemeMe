@@ -11,16 +11,11 @@ import UIKit
 class MemeTableViewController : UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     var memes : [Meme]!
-    let memeTableCellReuseId = "MemeTableViewCellReuseId"
     var appFirstStarted = true
     @IBOutlet weak var memeTableView: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Get the savedMemes array from the App Delegate
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        memes = appDelegate.savedMemes
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -49,7 +44,7 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
-        let cell = tableView.dequeueReusableCellWithIdentifier(memeTableCellReuseId) as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("MemeTableViewCellReuseId") as! UITableViewCell
         let meme = self.memes[indexPath.row]
 
         // Set the name and image

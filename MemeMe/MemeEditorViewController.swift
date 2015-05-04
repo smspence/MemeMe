@@ -69,13 +69,20 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         self.unsubscribeFromKeyboardNotifications()
     }
 
+    var currentKeyboardOffset : CGFloat = 0
+
     func keyboardWillShow(notification: NSNotification) {
         // If the bottom text field is selected, move the view up so
         //  the bottom text will not be covered by the keyboard
         if bottomTextField.isFirstResponder() {
             // The origin (0, 0) is at the top of the screen,
-            //  so subtract the height of the keyboard to move the view up
+            //  so subtract the height of the keyboard to move the view up.
+            //  First, undo the currentKeyboardOffset. This needs to be done
+            //  in case the user is showing or hiding the predictive-text
+            //  portion of the keyboard.
+            self.view.frame.origin.y += currentKeyboardOffset
             self.view.frame.origin.y -= getKeyboardHeight(notification)
+            currentKeyboardOffset = getKeyboardHeight(notification)
         }
     }
 
@@ -86,6 +93,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
             // The origin (0, 0) is at the top of the screen,
             //  so add the height of the keyboard to move the view down
             self.view.frame.origin.y += getKeyboardHeight(notification)
+            currentKeyboardOffset = 0
         }
     }
 
@@ -204,9 +212,10 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
                 println("returned \(returnedItems.count) modified items")
             }
 
-            self.dismissViewControllerAnimated(true, completion: nil)
-
             self.saveMeme()
+
+            // Dismiss the meme editor, so the user is taken back to the sent memes view
+            self.dismissViewControllerAnimated(true, completion: nil)
 
         } else {
             println("not completed")
@@ -230,7 +239,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     }
 
     @IBAction func cancelButtonPressed(sender: AnyObject) {
-        println("In cancelButtonPressed()")
         // Dismiss the meme editor, so the user will be back in the
         //   sent memes table view or collection view
         self.dismissViewControllerAnimated(true, completion: nil)
@@ -239,7 +247,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
 
         if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            //println("Picked image: \(info.description)")
             imagePickerView.image = pickedImage
             memeEditorShareButton.enabled = true
         } else {
@@ -250,7 +257,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     }
 
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        //println("User cancelled the image picker controller")
         self.dismissViewControllerAnimated(true, completion: nil)
     }
 

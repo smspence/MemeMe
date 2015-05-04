@@ -11,14 +11,9 @@ import UIKit
 class MemeCollectionViewController : UICollectionViewController, UICollectionViewDataSource, UICollectionViewDelegate {
 
     var memes : [Meme]!
-    let memeCollectionCellReuseId = "memeCollectionViewCellReuseId"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Get the savedMemes array from the App Delegate
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        memes = appDelegate.savedMemes
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -37,7 +32,7 @@ class MemeCollectionViewController : UICollectionViewController, UICollectionVie
 
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
 
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(memeCollectionCellReuseId, forIndexPath: indexPath) as! MemeCollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("memeCollectionViewCellReuseId", forIndexPath: indexPath) as! MemeCollectionViewCell
         let meme = memes[indexPath.item]
         cell.imageView.image = meme.memedImage
 
