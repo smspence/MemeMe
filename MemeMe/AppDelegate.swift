@@ -12,6 +12,9 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    // The savedMemes array is our shared data model,
+    //  used for sharing the saved memes between the
+    //  meme editor, meme table view, and meme collection view.
     var savedMemes = [Meme]()
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {

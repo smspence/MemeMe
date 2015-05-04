@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
+class MemeEditorViewController : UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var imagePickerView: UIImageView!
     @IBOutlet weak var topTextField: UITextField!
@@ -231,12 +231,15 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
 
     @IBAction func cancelButtonPressed(sender: AnyObject) {
         println("In cancelButtonPressed()")
+        // Dismiss the meme editor, so the user will be back in the
+        //   sent memes table view or collection view
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
 
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
 
         if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            println("Picked image: \(info.description)")
+            //println("Picked image: \(info.description)")
             imagePickerView.image = pickedImage
             memeEditorShareButton.enabled = true
         } else {
