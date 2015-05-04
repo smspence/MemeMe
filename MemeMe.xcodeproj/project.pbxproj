@@ -13,6 +13,7 @@
 		A639480D1AF6DB8800FFD34E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A639480C1AF6DB8800FFD34E /* Images.xcassets */; };
 		A63948101AF6DB8800FFD34E /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A639480E1AF6DB8800FFD34E /* LaunchScreen.xib */; };
 		A639481C1AF6DB8800FFD34E /* MemeMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A639481B1AF6DB8800FFD34E /* MemeMeTests.swift */; };
+		A63948261AF6F9E300FFD34E /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63948251AF6F9E300FFD34E /* Meme.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,7 @@
 		A63948151AF6DB8800FFD34E /* MemeMeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemeMeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A639481A1AF6DB8800FFD34E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A639481B1AF6DB8800FFD34E /* MemeMeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemeMeTests.swift; sourceTree = "<group>"; };
+		A63948251AF6F9E300FFD34E /* Meme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +80,7 @@
 			isa = PBXGroup;
 			children = (
 				A63948051AF6DB8800FFD34E /* AppDelegate.swift */,
+				A63948251AF6F9E300FFD34E /* Meme.swift */,
 				A63948071AF6DB8800FFD34E /* MemeEditorViewController.swift */,
 				A63948091AF6DB8800FFD34E /* Main.storyboard */,
 				A639480C1AF6DB8800FFD34E /* Images.xcassets */,
@@ -212,6 +215,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A63948261AF6F9E300FFD34E /* Meme.swift in Sources */,
 				A63948081AF6DB8800FFD34E /* MemeEditorViewController.swift in Sources */,
 				A63948061AF6DB8800FFD34E /* AppDelegate.swift in Sources */,
 			);
