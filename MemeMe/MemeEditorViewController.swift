@@ -31,7 +31,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         let memeTextAttributes = [
             NSStrokeColorAttributeName : UIColor.blackColor(),
             NSForegroundColorAttributeName : UIColor.whiteColor(),
-            NSFontAttributeName : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            NSFontAttributeName : UIFont(name: "Impact", size: 40)!,
             NSStrokeWidthAttributeName : -3.0 // Negative values result in text that is both stroked and filled
         ]
 
@@ -61,6 +61,20 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
 
         // Only enable the camera button if the device has a camera
         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
+
+        /* Use this code to find names of all fonts available to app
+        for family in UIFont.familyNames()
+        {
+            let familyString = family as! String
+            println("family: \(familyString)")
+
+            for name in UIFont.fontNamesForFamilyName(familyString)
+            {
+                let nameString = name as! String
+                println("        \(nameString)")
+            }
+        }
+        */
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -76,13 +90,14 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         //  the bottom text will not be covered by the keyboard
         if bottomTextField.isFirstResponder() {
             // The origin (0, 0) is at the top of the screen,
-            //  so subtract the height of the keyboard to move the view up.
-            //  First, undo the currentKeyboardOffset. This needs to be done
+            //  so subtract the keyboardHeight to move the view up.
+            //  But first, undo the currentKeyboardOffset. This needs to be done
             //  in case the user is showing or hiding the predictive-text
             //  portion of the keyboard.
             self.view.frame.origin.y += currentKeyboardOffset
-            self.view.frame.origin.y -= getKeyboardHeight(notification)
-            currentKeyboardOffset = getKeyboardHeight(notification)
+            let keyboardHeight = getKeyboardHeight(notification)
+            self.view.frame.origin.y -= keyboardHeight
+            currentKeyboardOffset = keyboardHeight
         }
     }
 
@@ -167,8 +182,13 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         memeEditorNavBar.hidden = true
         memeEditorToolbar.hidden = true
 
-        UIGraphicsBeginImageContext(self.view.frame.size)
+        UIGraphicsBeginImageContextWithOptions(self.view.frame.size, false, 0.0)
         self.view.drawViewHierarchyInRect(self.view.frame, afterScreenUpdates: true)
+
+        //UIGraphicsBeginImageContextWithOptions(self.imagePickerView.image!.size, false, 0.0)
+        // TODO - fix aspect ratio here if going to use this commented out code
+        //self.view.drawViewHierarchyInRect(CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.imagePickerView.image!.size.width, self.imagePickerView.image!.size.height), afterScreenUpdates: true)
+
         let memedImage : UIImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
 
