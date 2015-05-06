@@ -61,20 +61,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
 
         // Only enable the camera button if the device has a camera
         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
-
-        /* Use this code to find names of all fonts available to app
-        for family in UIFont.familyNames()
-        {
-            let familyString = family as! String
-            println("family: \(familyString)")
-
-            for name in UIFont.fontNamesForFamilyName(familyString)
-            {
-                let nameString = name as! String
-                println("        \(nameString)")
-            }
-        }
-        */
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -247,13 +233,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     }
 
     @IBAction func shareButtonPressed(sender: AnyObject) {
-        println("In shareButtonPressed()")
-
-        // Put the memed image into an array, because the activity controller expects an array as the parameter
-        var imageArray = [UIImage]()
-        imageArray.append( self.createMemedImage() )
-
-        let activityVC = UIActivityViewController(activityItems: imageArray, applicationActivities: nil)
+        let activityVC = UIActivityViewController(activityItems: [self.createMemedImage()], applicationActivities: nil)
         activityVC.completionWithItemsHandler = activityCompletionHandler
         self.presentViewController(activityVC, animated: true, completion: nil)
     }
