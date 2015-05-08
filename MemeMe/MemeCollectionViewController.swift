@@ -8,15 +8,22 @@
 
 import UIKit
 
-class MemeCollectionViewController : UICollectionViewController, UICollectionViewDataSource, UICollectionViewDelegate {
+class MemeCollectionViewController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
 
     var memes : [Meme]!
     @IBOutlet weak var editButton: UIBarButtonItem!
+    @IBOutlet weak var memeCollectionView: UICollectionView!
+    @IBOutlet weak var toolBarWithTrashButton: UIToolbar!
+    @IBOutlet weak var trashButton : UIBarButtonItem!
+    @IBOutlet weak var navBar: UINavigationItem!
+    @IBOutlet weak var addMemeButton: UIBarButtonItem!
     var editModeEnabled = false
-    var selectedIndexPath : NSIndexPath?
+    var selectedIndexPaths = Set<NSIndexPath>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        memeCollectionView.allowsMultipleSelection = true
     }
 
     func getAppDelegate() -> AppDelegate {
@@ -65,7 +72,7 @@ class MemeCollectionViewController : UICollectionViewController, UICollectionVie
         super.viewWillAppear(animated)
 
         // TODO - remove
-        if firstRun {
+        if firstRun && self.getAppDelegate().savedMemes.count == 0 {
             self.setUpTestMemes()
             firstRun = false
         }
@@ -73,7 +80,7 @@ class MemeCollectionViewController : UICollectionViewController, UICollectionVie
         // Get the savedMemes array from the App Delegate
         memes = getAppDelegate().savedMemes
 
-        self.collectionView?.reloadData()
+        self.memeCollectionView.reloadData()
 
         self.editButton.enabled = (memes.count > 0)
     }
@@ -83,68 +90,118 @@ class MemeCollectionViewController : UICollectionViewController, UICollectionVie
         self.editModeEnabled = !self.editModeEnabled
 
         if self.editModeEnabled {
-            self.editButton.title = "Cancel"
-
-            // TODO - hide the tab bar and show toolbar with delete button
-            self.tabBarController?.tabBar.hidden = true
+            // "Edit" was pressed
+            self.editModeStart()
         } else {
-            self.editButton.title = "Edit"
-
-            // TODO - hide tool bar with delete button and show tab bar
-            self.tabBarController?.tabBar.hidden = false
+            // "Cancel" was pressed
+            self.editModeEnd()
         }
     }
 
-    @IBOutlet weak var toolBarWithTrashButton: UIToolbar!
+    func editModeStart() {
+        // The view has entered Edit mode,
+        //  so the button should now function as a "Cancel"
+        self.editButton.title = "Cancel"
 
-    @IBAction func deleteButtonPressed(sender: AnyObject) {
+        // Hide the tab bar and show toolbar with delete button
+        self.tabBarController?.tabBar.hidden = true
+        self.toolBarWithTrashButton.hidden = false
 
-        if let selectedIndexPath = self.selectedIndexPath {
+        // We begin with no items selected, so disable the trash button for now
+        self.trashButton.enabled = false
 
-            getAppDelegate().savedMemes.removeAtIndex(selectedIndexPath.item)
-            memes = getAppDelegate().savedMemes
+        self.navBar.title = "Select Items"
+        self.addMemeButton.enabled = false
+    }
 
-            self.collectionView?.deleteItemsAtIndexPaths([selectedIndexPath])
+    func editModeEnd() {
+        // Cancel or trash has been tapped, so set things back
+        //  to how they were before Edit was tapped
 
-            if memes.count == 0 {
-                // TODO - set things back to defaults
+        // The button should go back to saying "Edit"
+        self.editButton.title = "Edit"
+        self.editButton.enabled = (self.memes.count > 0)
+
+        // hide tool bar with delete button and show tab bar
+        self.tabBarController?.tabBar.hidden = false
+        self.trashButton.enabled = false
+        self.toolBarWithTrashButton.hidden = true
+
+        self.navBar.title = "Sent Memes"
+        self.addMemeButton.enabled = true
+
+        // If cancel was pressed with items selected,
+        //  we will "deselect" them here
+        for indexPath in self.selectedIndexPaths {
+            self.memeCollectionView.deselectItemAtIndexPath(indexPath, animated: false)
+
+            if let cell = self.memeCollectionView.cellForItemAtIndexPath(indexPath) as? MemeCollectionViewCell {
+                cell.setSelectionOverlayVisible(false)
             }
         }
 
-        self.selectedIndexPath = nil
+        self.selectedIndexPaths.removeAll(keepCapacity: false)
+
+        self.editModeEnabled = false
     }
 
-    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    @IBAction func deleteButtonPressed(sender: AnyObject) {
+
+        let appDelegate = getAppDelegate()
+
+        // When deleting multiple memes at once,
+        //    we have to delete items from the memes array in order from
+        //    highest to lowest index, to prevent attempts to delete
+        //    an index that is out of range.
+        // Create an array with the contents of our selectedIndexPaths set.
+        // Sort the array from highest to lowest item index.
+        var sortedArray = Array(self.selectedIndexPaths)
+        sortedArray.sort { (indexPath1 : NSIndexPath, indexPath2 : NSIndexPath) -> Bool in
+            return indexPath1.item > indexPath2.item
+        }
+
+        for indexPath in sortedArray {
+            appDelegate.savedMemes.removeAtIndex(indexPath.item)
+            memes = appDelegate.savedMemes
+        }
+
+        self.memeCollectionView.deleteItemsAtIndexPaths( sortedArray )
+
+        self.selectedIndexPaths.removeAll(keepCapacity: false)
+
+        self.editModeEnd()
+    }
+
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.memes.count
     }
 
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
 
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("memeCollectionViewCellReuseId", forIndexPath: indexPath) as! MemeCollectionViewCell
         let meme = memes[indexPath.item]
         cell.imageView.image = meme.memedImage
-        cell.selectionOverlay.hidden = true
+
+        if self.selectedIndexPaths.contains(indexPath) {
+            cell.setSelectionOverlayVisible(true)
+        } else {
+            cell.setSelectionOverlayVisible(false)
+        }
 
         return cell
     }
 
-    override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
 
         if self.editModeEnabled {
 
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as! MemeCollectionViewCell
 
-            if indexPath == selectedIndexPath {
-                // Cell is already selected, so remove selection overlay and selected index path
-                //  (The cell will no longer be selected for deletion)
-                cell.selectionOverlay.hidden = true
-                selectedIndexPath = nil
+            // The cell should be selected for deletion
+            cell.setSelectionOverlayVisible(true)
+            self.selectedIndexPaths.insert(indexPath)
 
-            } else {
-                // The cell should be selected for deletion
-                cell.selectionOverlay.hidden = false
-                selectedIndexPath = indexPath
-            }
+            self.trashButton.enabled = true
 
         } else {
             let detailVC = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailViewStoryboardId") as! MemeDetailViewController
@@ -153,11 +210,14 @@ class MemeCollectionViewController : UICollectionViewController, UICollectionVie
         }
     }
 
-    override func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
 
         if self.editModeEnabled {
-            let cell = collectionView.cellForItemAtIndexPath(indexPath) as! MemeCollectionViewCell
-            cell.selectionOverlay.hidden = true
+            if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? MemeCollectionViewCell {
+                cell.setSelectionOverlayVisible(false)
+            }
+            self.selectedIndexPaths.remove(indexPath)
+            self.trashButton.enabled = (self.selectedIndexPaths.count > 0)
         }
     }
 

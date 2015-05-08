@@ -44,7 +44,14 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
         }
     }
 
-    // TODO - prepare for segue to meme editor, if in tableView edit mode, disable tableView edit mode
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        if self.memeTableView.editing {
+            self.memeTableView.setEditing(false, animated: true)
+            editButton.title = "Edit"
+        }
+    }
 
     @IBAction func editButtonTapped(sender: AnyObject) {
 
@@ -55,8 +62,10 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
         self.memeTableView.setEditing(newEditState, animated: true)
 
         if newEditState {
+            // We have entered Editing mode, so change button to "Done"
             editButton.title = "Done"
         } else {
+            // We have exited edit mode, so change button back to "Edit"
             editButton.title = "Edit"
         }
     }
@@ -73,7 +82,7 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Left)
 
             if memes.count == 0 {
-                // Table is empty so, set Edit button back to defaults and disable editing of the table
+                // Table is empty, so set Edit button back to defaults and disable editing of the table
                 editButton.title = "Edit"
                 editButton.enabled = false
                 tableView.setEditing(false, animated: true)

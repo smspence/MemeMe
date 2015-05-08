@@ -13,4 +13,8 @@ class MemeCollectionViewCell : UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var selectionOverlay: UIView!
 
+    func setSelectionOverlayVisible(state : Bool) {
+        self.selectionOverlay.hidden = !state
+    }
+
 }
