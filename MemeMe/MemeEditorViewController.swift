@@ -19,6 +19,8 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     @IBOutlet weak var memeEditorShareButton: UIBarButtonItem!
 
+    var memePassedIn : Meme?
+
     let defaultTopText    = "TOP"
     let defaultBottomText = "BOTTOM"
 
@@ -54,6 +56,14 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
 
         // Subscribe to keyboard notification, to allow the view to be moved up when the keyboard shows
         self.subscribeToKeyboardNotifications()
+
+        if let meme = memePassedIn {
+            // A meme was passed in from the outside for editing, so
+            //  copy its properties out here
+            imagePickerView.image = meme.originalImage
+            topTextField.text = meme.topText
+            bottomTextField.text = meme.bottomText
+        }
 
         if imagePickerView.image == nil {
             memeEditorShareButton.enabled = false

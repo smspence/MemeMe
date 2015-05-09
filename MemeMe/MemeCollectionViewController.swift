@@ -121,8 +121,7 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         self.editModeEnabled = false
     }
 
-    @IBAction func deleteButtonPressed(sender: AnyObject) {
-
+    func doDelete() {
         let appDelegate = getAppDelegate()
 
         // When deleting multiple memes at once,
@@ -146,6 +145,29 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         self.memeCollectionView.deleteItemsAtIndexPaths( sortedArray )
         self.selectedIndexPaths.removeAll(keepCapacity: false)
         self.editModeEnd()
+    }
+
+    @IBAction func deleteButtonPressed(sender: AnyObject) {
+        // Present an alert asking the user if they are sure they want to delete
+
+        let selectedCount = self.selectedIndexPaths.count
+
+        let controller = UIAlertController()
+        controller.message = "Are you sure you want to delete the selected meme"
+        controller.message = controller.message! + ((selectedCount > 1) ? "s?" : "?")
+
+        let deleteButtonTitle = (selectedCount > 1) ? "Delete \(selectedCount) Memes" : "Delete Meme"
+        let deleteAction = UIAlertAction(title: deleteButtonTitle, style: UIAlertActionStyle.Destructive) {
+            action in self.doDelete()
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel) {
+            action in self.dismissViewControllerAnimated(true, completion: nil)
+        }
+
+        controller.addAction(deleteAction)
+        controller.addAction(cancelAction)
+        self.presentViewController(controller, animated: true, completion: nil)
     }
 
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

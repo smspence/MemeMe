@@ -21,6 +21,9 @@ class MemeDetailViewController : UIViewController {
         tapRecognizer.numberOfTapsRequired = 1
         tapRecognizer.numberOfTouchesRequired = 1
         self.view.addGestureRecognizer(tapRecognizer)
+
+        var button = UIBarButtonItem(title: "Edit", style: UIBarButtonItemStyle.Plain, target: self, action: "handleEditButton:")
+        self.navigationItem.rightBarButtonItem = button
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -51,6 +54,14 @@ class MemeDetailViewController : UIViewController {
         if sender.state == .Ended {
             fadeNavAndStatusBar()
         }
+    }
+
+    func handleEditButton(sender: UIBarButtonItem) {
+        // Pass the meme that is being viewed into the meme editor
+
+        let editorVC = self.storyboard!.instantiateViewControllerWithIdentifier("MemeEditorStoryboardId") as! MemeEditorViewController
+        editorVC.memePassedIn = meme
+        self.presentViewController(editorVC, animated: true, completion: nil)
     }
 
 }
