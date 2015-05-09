@@ -368,9 +368,11 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="hXn-lP-zU0">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <gestureRecognizers/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="hXn-lP-zU0" secondAttribute="trailing" constant="-16" id="F4L-3V-A7L"/>
                             <constraint firstItem="hXn-lP-zU0" firstAttribute="leading" secondItem="4b6-7O-lXD" secondAttribute="leadingMargin" constant="-16" id="MDQ-B9-9HR"/>

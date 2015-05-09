@@ -113,6 +113,7 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
 
         let detailVC = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailViewStoryboardId") as! MemeDetailViewController
         detailVC.meme = self.memes[indexPath.item]
+        detailVC.hidesBottomBarWhenPushed = true
         self.navigationController!.pushViewController(detailVC, animated: true)
     }
 }

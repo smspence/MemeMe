@@ -22,18 +22,18 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     let defaultTopText    = "TOP"
     let defaultBottomText = "BOTTOM"
 
+    let memeTextAttributes = [
+        NSStrokeColorAttributeName : UIColor.blackColor(),
+        NSForegroundColorAttributeName : UIColor.whiteColor(),
+        NSFontAttributeName : UIFont(name: "Impact", size: 40)!,
+        NSStrokeWidthAttributeName : -3.0 // Negative values result in text that is both stroked and filled
+    ]
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         topTextField.delegate    = self
         bottomTextField.delegate = self
-
-        let memeTextAttributes = [
-            NSStrokeColorAttributeName : UIColor.blackColor(),
-            NSForegroundColorAttributeName : UIColor.whiteColor(),
-            NSFontAttributeName : UIFont(name: "Impact", size: 40)!,
-            NSStrokeWidthAttributeName : -3.0 // Negative values result in text that is both stroked and filled
-        ]
 
         topTextField.defaultTextAttributes = memeTextAttributes
         bottomTextField.defaultTextAttributes = memeTextAttributes
@@ -127,6 +127,10 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
            (textField === bottomTextField && textField.text == defaultBottomText) {
                 textField.text = ""
         }
+
+        // Set style here to prevent bug where it is possible to lose the text outline
+        //    if the user repeatedly presses enter in a blank text field
+        textField.defaultTextAttributes = memeTextAttributes
     }
 
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
@@ -138,7 +142,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
 
         // Manually set the text field to the uppercase version of newText
         textField.text = newText.uppercaseString
-        
+
         // returning false, because we manually changed the text field's text above
         return false;
     }
@@ -151,10 +155,10 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         // Figure out whether the user pressed the camera or album button
         let barButton = sender as! UIBarButtonItem
         if barButton.title == "Album" {
-            println("Album selected")
+            // User tapped the Album button
             pickerController.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
         } else {
-            println("Camera selected")
+            // User tapped the camera button
             pickerController.sourceType = UIImagePickerControllerSourceType.Camera
             pickerController.cameraDevice = UIImagePickerControllerCameraDevice.Rear
         }
@@ -170,11 +174,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
 
         UIGraphicsBeginImageContextWithOptions(self.view.frame.size, false, 0.0)
         self.view.drawViewHierarchyInRect(self.view.frame, afterScreenUpdates: true)
-
-        //UIGraphicsBeginImageContextWithOptions(self.imagePickerView.image!.size, false, 0.0)
-        // TODO - fix aspect ratio here if going to use this commented out code
-        //self.view.drawViewHierarchyInRect(CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.imagePickerView.image!.size.width, self.imagePickerView.image!.size.height), afterScreenUpdates: true)
-
         let memedImage : UIImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
 
@@ -197,8 +196,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
             // Add it to the savedMemes array in the App Delegate
             let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
             appDelegate.savedMemes.append(meme)
-
-            println("In saveMeme(), saved meme")
         } else {
             println("In saveMeme(), imagePickerView.image is nil")
         }
@@ -208,15 +205,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         println("In activityCompletionHandler()")
 
         if completed {
-            if activityType != nil {
-                println("completed activity type \(activityType)")
-            } else {
-                println("completed")
-            }
-
-            if returnedItems != nil {
-                println("returned \(returnedItems.count) modified items")
-            }
 
             self.saveMeme()
 
@@ -224,7 +212,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
             self.dismissViewControllerAnimated(true, completion: nil)
 
         } else {
-            println("not completed")
+            println("Activity did not complete")
         }
 
         if activityError != nil {
@@ -250,7 +238,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
             imagePickerView.image = pickedImage
             memeEditorShareButton.enabled = true
         } else {
-            println("Image optional was nil")
+            println("In imagePickerController didFinishPickingMediaWithInfo, image optional was nil")
         }
 
         self.dismissViewControllerAnimated(true, completion: nil)

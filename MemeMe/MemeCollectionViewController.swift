@@ -39,33 +39,9 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
                     memedImage: UIImage(named: "myTestImage")! )
     }
     func setUpTestMemes() {
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
-        getAppDelegate().savedMemes.append(getTestMeme())
+        for i in 1...40 {
+            getAppDelegate().savedMemes.append(getTestMeme())
+        }
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -161,14 +137,14 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         }
 
         for indexPath in sortedArray {
+            // Delete the meme from the shared model
             appDelegate.savedMemes.removeAtIndex(indexPath.item)
-            memes = appDelegate.savedMemes
         }
+        // Update our copy of the shared model
+        memes = appDelegate.savedMemes
 
         self.memeCollectionView.deleteItemsAtIndexPaths( sortedArray )
-
         self.selectedIndexPaths.removeAll(keepCapacity: false)
-
         self.editModeEnd()
     }
 
@@ -206,6 +182,7 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         } else {
             let detailVC = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailViewStoryboardId") as! MemeDetailViewController
             detailVC.meme = self.memes[indexPath.item]
+            detailVC.hidesBottomBarWhenPushed = true
             self.navigationController!.pushViewController(detailVC, animated: true)
         }
     }
