@@ -34,16 +34,28 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Only enable the camera button if the device has a camera
+        cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
+
         topTextField.delegate    = self
         bottomTextField.delegate = self
 
         topTextField.defaultTextAttributes = memeTextAttributes
         bottomTextField.defaultTextAttributes = memeTextAttributes
+        topTextField.textAlignment    = NSTextAlignment.Center
+        bottomTextField.textAlignment = NSTextAlignment.Center
 
         topTextField.text    = defaultTopText
         bottomTextField.text = defaultBottomText
-        topTextField.textAlignment    = NSTextAlignment.Center
-        bottomTextField.textAlignment = NSTextAlignment.Center
+
+        if let meme = memePassedIn {
+            // A meme was passed in from the outside for editing, so
+            //  copy its properties out here
+            imagePickerView.image = meme.originalImage
+            topTextField.text = meme.topText
+            bottomTextField.text = meme.bottomText
+        }
+        memePassedIn = nil
     }
 
     // Don't show the status bar while in the meme editor
@@ -57,20 +69,9 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         // Subscribe to keyboard notification, to allow the view to be moved up when the keyboard shows
         self.subscribeToKeyboardNotifications()
 
-        if let meme = memePassedIn {
-            // A meme was passed in from the outside for editing, so
-            //  copy its properties out here
-            imagePickerView.image = meme.originalImage
-            topTextField.text = meme.topText
-            bottomTextField.text = meme.bottomText
-        }
-
         if imagePickerView.image == nil {
             memeEditorShareButton.enabled = false
         }
-
-        // Only enable the camera button if the device has a camera
-        cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -141,6 +142,7 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         // Set style here to prevent bug where it is possible to lose the text outline
         //    if the user repeatedly presses enter in a blank text field
         textField.defaultTextAttributes = memeTextAttributes
+        textField.textAlignment = NSTextAlignment.Center
     }
 
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
@@ -157,14 +159,12 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
         return false;
     }
 
-    @IBAction func pickAnImage(sender: AnyObject) {
+    @IBAction func pickAnImage(sender: UIBarButtonItem) {
 
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
 
-        // Figure out whether the user pressed the camera or album button
-        let barButton = sender as! UIBarButtonItem
-        if barButton.title == "Album" {
+        if sender.title == "Album" {
             // User tapped the Album button
             pickerController.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
         } else {
@@ -212,7 +212,6 @@ class MemeEditorViewController : UIViewController, UIImagePickerControllerDelega
     }
 
     func activityCompletionHandler(activityType: String!, completed: Bool, returnedItems: [AnyObject]!, activityError: NSError!) {
-        println("In activityCompletionHandler()")
 
         if completed {
 

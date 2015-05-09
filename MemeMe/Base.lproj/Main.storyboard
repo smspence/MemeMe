@@ -370,39 +370,76 @@
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <gestureRecognizers/>
                             </imageView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CyI-D0-392">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="tZi-p0-eMS"/>
+                                </constraints>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="XKG-vY-u0l"/>
+                                    <barButtonItem systemItem="trash" id="Zfv-Yp-e42">
+                                        <color key="tintColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <connections>
+                                            <action selector="handleDeleteButton:" destination="ioX-L2-UeN" id="TQX-WC-Zpb"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="tZi-p0-eMS"/>
+                                    </mask>
+                                </variation>
+                                <variation key="widthClass=compact">
+                                    <mask key="constraints">
+                                        <include reference="tZi-p0-eMS"/>
+                                    </mask>
+                                </variation>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="hXn-lP-zU0" secondAttribute="trailing" constant="-16" id="F4L-3V-A7L"/>
+                            <constraint firstItem="CyI-D0-392" firstAttribute="bottom" secondItem="4b6-7O-lXD" secondAttribute="bottomMargin" id="Lmh-5o-6TZ"/>
                             <constraint firstItem="hXn-lP-zU0" firstAttribute="leading" secondItem="4b6-7O-lXD" secondAttribute="leadingMargin" constant="-16" id="MDQ-B9-9HR"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="CyI-D0-392" secondAttribute="trailing" constant="-16" id="Tng-za-bC9"/>
+                            <constraint firstItem="CyI-D0-392" firstAttribute="leading" secondItem="4b6-7O-lXD" secondAttribute="leadingMargin" constant="-16" id="msU-Sq-a1E"/>
                             <constraint firstItem="hXn-lP-zU0" firstAttribute="top" secondItem="4b6-7O-lXD" secondAttribute="topMargin" id="pUi-dF-RSK"/>
                             <constraint firstItem="hXn-lP-zU0" firstAttribute="bottom" secondItem="4b6-7O-lXD" secondAttribute="bottomMargin" id="vZZ-Bb-ler"/>
                         </constraints>
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="hXn-lP-zU0"/>
+                                <exclude reference="CyI-D0-392"/>
                             </mask>
                             <mask key="constraints">
                                 <exclude reference="F4L-3V-A7L"/>
                                 <exclude reference="MDQ-B9-9HR"/>
                                 <exclude reference="pUi-dF-RSK"/>
                                 <exclude reference="vZZ-Bb-ler"/>
+                                <exclude reference="Lmh-5o-6TZ"/>
+                                <exclude reference="Tng-za-bC9"/>
+                                <exclude reference="msU-Sq-a1E"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="hXn-lP-zU0"/>
+                                <include reference="CyI-D0-392"/>
                             </mask>
                             <mask key="constraints">
                                 <include reference="F4L-3V-A7L"/>
                                 <include reference="MDQ-B9-9HR"/>
                                 <include reference="pUi-dF-RSK"/>
                                 <include reference="vZZ-Bb-ler"/>
+                                <include reference="Lmh-5o-6TZ"/>
+                                <include reference="Tng-za-bC9"/>
+                                <include reference="msU-Sq-a1E"/>
                             </mask>
                         </variation>
                     </view>
                     <connections>
+                        <outlet property="deletionToolbar" destination="CyI-D0-392" id="8W6-jn-sbn"/>
                         <outlet property="memeImageView" destination="hXn-lP-zU0" id="s2r-k8-BNp"/>
                     </connections>
                 </viewController>

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MemeCollectionViewController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
+class MemeCollectionViewController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, MemeDetailViewDeleteDelegate {
 
     var memes : [Meme]!
     @IBOutlet weak var editButton: UIBarButtonItem!
@@ -20,6 +20,8 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
     var editModeEnabled = false
     var selectedIndexPaths = Set<NSIndexPath>()
 
+    var detailViewIndexPath : NSIndexPath?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -30,16 +32,22 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         return UIApplication.sharedApplication().delegate as! AppDelegate
     }
 
+    func reloadCollectionView() {
+        // Update our copy of the shared model
+        memes = getAppDelegate().savedMemes
+        memeCollectionView.reloadData()
+    }
+
     // TODO - remove
     var firstRun = true
     func getTestMeme() -> Meme {
-        return Meme(topText: "Some test ABC",
-                    bottomText: "bottom 123",
+        return Meme(topText: "SOME TEXT ABC",
+                    bottomText: "MORE HERE 123",
                     originalImage: UIImage(named: "myTestImage")!,
                     memedImage: UIImage(named: "myTestImage")! )
     }
     func setUpTestMemes() {
-        for i in 1...40 {
+        for i in 1...8 {
             getAppDelegate().savedMemes.append(getTestMeme())
         }
     }
@@ -53,12 +61,11 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
             firstRun = false
         }
 
-        // Get the savedMemes array from the App Delegate
-        memes = getAppDelegate().savedMemes
-
-        self.memeCollectionView.reloadData()
+        reloadCollectionView()
 
         self.editButton.enabled = (memes.count > 0)
+
+        detailViewIndexPath = nil
     }
 
     @IBAction func editButtonTapped(sender: AnyObject) {
@@ -91,8 +98,22 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
     }
 
     func editModeEnd() {
-        // Cancel or trash has been tapped, so set things back
+        // User has either cancelled editing,
+        //  or confirmed deletion, so set things back
         //  to how they were before Edit was tapped
+
+        //  Make sure the previously selected memes are all deselected
+        for indexPath in self.selectedIndexPaths {
+            self.memeCollectionView.deselectItemAtIndexPath(indexPath, animated: false)
+
+            if let cell = self.memeCollectionView.cellForItemAtIndexPath(indexPath) as? MemeCollectionViewCell {
+                cell.setSelectionOverlayVisible(false)
+            }
+        }
+
+        self.selectedIndexPaths.removeAll(keepCapacity: false)
+
+        self.editModeEnabled = false
 
         // The button should go back to saying "Edit"
         self.editButton.title = "Edit"
@@ -105,20 +126,6 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
 
         self.navBar.title = "Sent Memes"
         self.addMemeButton.enabled = true
-
-        // If cancel was pressed with items selected,
-        //  we will "deselect" them here
-        for indexPath in self.selectedIndexPaths {
-            self.memeCollectionView.deselectItemAtIndexPath(indexPath, animated: false)
-
-            if let cell = self.memeCollectionView.cellForItemAtIndexPath(indexPath) as? MemeCollectionViewCell {
-                cell.setSelectionOverlayVisible(false)
-            }
-        }
-
-        self.selectedIndexPaths.removeAll(keepCapacity: false)
-
-        self.editModeEnabled = false
     }
 
     func doDelete() {
@@ -135,15 +142,8 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
             return indexPath1.item > indexPath2.item
         }
 
-        for indexPath in sortedArray {
-            // Delete the meme from the shared model
-            appDelegate.savedMemes.removeAtIndex(indexPath.item)
-        }
-        // Update our copy of the shared model
-        memes = appDelegate.savedMemes
+        updateModelAndDeleteItemsFromCollectionView(memeCollectionView, indexPathsToDelete: sortedArray)
 
-        self.memeCollectionView.deleteItemsAtIndexPaths( sortedArray )
-        self.selectedIndexPaths.removeAll(keepCapacity: false)
         self.editModeEnd()
     }
 
@@ -153,8 +153,8 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         let selectedCount = self.selectedIndexPaths.count
 
         let controller = UIAlertController()
-        controller.message = "Are you sure you want to delete the selected meme"
-        controller.message = controller.message! + ((selectedCount > 1) ? "s?" : "?")
+        controller.title = "Are you sure you want to delete the selected meme"
+        controller.title = controller.title! + ((selectedCount > 1) ? "s?" : "?")
 
         let deleteButtonTitle = (selectedCount > 1) ? "Delete \(selectedCount) Memes" : "Delete Meme"
         let deleteAction = UIAlertAction(title: deleteButtonTitle, style: UIAlertActionStyle.Destructive) {
@@ -192,6 +192,8 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
 
         if self.editModeEnabled {
+            // Add the selected meme to our list of items that will potentially be deleted,
+            //   and show the selection overlay over this item in the collection view
 
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as! MemeCollectionViewCell
 
@@ -202,8 +204,13 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
             self.trashButton.enabled = true
 
         } else {
+            // Show the detail view of the selected meme
+
+            detailViewIndexPath = indexPath
+
             let detailVC = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailViewStoryboardId") as! MemeDetailViewController
             detailVC.meme = self.memes[indexPath.item]
+            detailVC.deletionDelegate = self
             detailVC.hidesBottomBarWhenPushed = true
             self.navigationController!.pushViewController(detailVC, animated: true)
         }
@@ -217,6 +224,42 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
             }
             self.selectedIndexPaths.remove(indexPath)
             self.trashButton.enabled = (self.selectedIndexPaths.count > 0)
+        }
+    }
+
+    func updateModelAndDeleteItemsFromCollectionView(collectionView: UICollectionView, indexPathsToDelete: [NSIndexPath]) {
+
+        // This line of code seemingly has to be here (when pressing delete from the detail view)
+        //  or else the delete command will fail (app crashes) with complaint of
+        //  "Invalid update: invalid number of items in section 0."
+        //  I have no idea why this line of code fixes it.  It seems like this should have no effect?
+        collectionView.numberOfSections()
+
+        for indexPath in indexPathsToDelete {
+            // Delete the meme from the shared model
+            getAppDelegate().savedMemes.removeAtIndex(indexPath.item)
+        }
+        // Update our copy of the shared model
+        memes = getAppDelegate().savedMemes
+
+        collectionView.deleteItemsAtIndexPaths(indexPathsToDelete)
+    }
+
+    func deleteMemeDetailViewItem() {
+        println("In collection view, deleteMemeDetailViewItem()")
+
+        if let indexPath = detailViewIndexPath {
+            // Reload data in case new memes have been added since the collection view was
+            //  last viewed (such as when the user adds a new meme by editing a meme
+            //  from the detail view)
+            reloadCollectionView()
+
+            updateModelAndDeleteItemsFromCollectionView(memeCollectionView, indexPathsToDelete: [indexPath])
+
+            detailViewIndexPath = nil
+
+        } else {
+            println("!! In collection view deleteMemeDetailViewItem(), detailViewIndexPath is nil !!")
         }
     }
 

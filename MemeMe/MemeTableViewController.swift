@@ -8,12 +8,14 @@
 
 import UIKit
 
-class MemeTableViewController : UIViewController, UITableViewDataSource, UITableViewDelegate {
+class MemeTableViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, MemeDetailViewDeleteDelegate {
 
     var memes : [Meme]!
     var appFirstStarted = true
     @IBOutlet weak var memeTableView: UITableView!
     @IBOutlet weak var editButton: UIBarButtonItem!
+
+    var detailViewIndexPath : NSIndexPath?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,15 +25,18 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
         return UIApplication.sharedApplication().delegate as! AppDelegate
     }
 
+    func reloadTableView() {
+        // Update our copy of the shared model and reload the table view
+        memes = getAppDelegate().savedMemes
+        self.memeTableView.reloadData()
+    }
+
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
-        // Get our copy of the shared model
-        memes = getAppDelegate().savedMemes
+        reloadTableView()
 
-        self.memeTableView.reloadData()
-
-        self.editButton.enabled = (memes.count > 0)
+        editButton.enabled = (memes.count > 0)
     }
 
     override func viewDidAppear(animated: Bool) {
@@ -42,6 +47,8 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
             // present the meme editor
             performSegueWithIdentifier("showMemeEditorSegue", sender: self)
         }
+
+        detailViewIndexPath = nil
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -75,11 +82,7 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
         case .Delete:
             // Handle deletion of meme from the model, and remove the corresponding row from the tableView
 
-            // remove the item from the shared model, and update our copy of the shared model
-            getAppDelegate().savedMemes.removeAtIndex(indexPath.row)
-            memes = getAppDelegate().savedMemes
-
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Left)
+            updateModelAndDeleteRowFromTableView(tableView, indexPathToDelete: indexPath)
 
             if memes.count == 0 {
                 // Table is empty, so set Edit button back to defaults and disable editing of the table
@@ -110,10 +113,42 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
     }
 
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        // Show the detail view of the selected meme
+
+        detailViewIndexPath = indexPath
 
         let detailVC = self.storyboard!.instantiateViewControllerWithIdentifier("MemeDetailViewStoryboardId") as! MemeDetailViewController
         detailVC.meme = self.memes[indexPath.item]
+        detailVC.deletionDelegate = self
         detailVC.hidesBottomBarWhenPushed = true
         self.navigationController!.pushViewController(detailVC, animated: true)
     }
+
+    func updateModelAndDeleteRowFromTableView(tableView: UITableView, indexPathToDelete: NSIndexPath) {
+        // Delete the meme from the shared model
+        getAppDelegate().savedMemes.removeAtIndex(indexPathToDelete.row)
+        // Update our copy of the shared model
+        memes = getAppDelegate().savedMemes
+
+        tableView.deleteRowsAtIndexPaths([indexPathToDelete], withRowAnimation: UITableViewRowAnimation.Left)
+    }
+
+    func deleteMemeDetailViewItem() {
+        println("In table view, deleteMemeDetailViewItem()")
+
+        if let indexPath = detailViewIndexPath {
+            // Reload data in case new memes have been added since the table view was
+            //  last viewed (such as when the user adds a new meme by editing a meme
+            //  from the detail view)
+            reloadTableView()
+
+            updateModelAndDeleteRowFromTableView(memeTableView, indexPathToDelete: indexPath)
+
+            detailViewIndexPath = nil
+
+        } else {
+            println("!! In table view deleteMemeDetailViewItem(), detailViewIndexPath is nil !!")
+        }
+    }
+
 }
