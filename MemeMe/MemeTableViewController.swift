@@ -77,12 +77,21 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
         }
     }
 
+    func deleteItemFromModel(index : Int) {
+        // Delete the meme from the shared model
+        getAppDelegate().savedMemes.removeAtIndex(index)
+        // Update our copy of the shared model
+        memes = getAppDelegate().savedMemes
+    }
+
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         switch editingStyle {
         case .Delete:
             // Handle deletion of meme from the model, and remove the corresponding row from the tableView
 
-            updateModelAndDeleteRowFromTableView(tableView, indexPathToDelete: indexPath)
+            deleteItemFromModel(indexPath.row)
+
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Left)
 
             if memes.count == 0 {
                 // Table is empty, so set Edit button back to defaults and disable editing of the table
@@ -124,25 +133,12 @@ class MemeTableViewController : UIViewController, UITableViewDataSource, UITable
         self.navigationController!.pushViewController(detailVC, animated: true)
     }
 
-    func updateModelAndDeleteRowFromTableView(tableView: UITableView, indexPathToDelete: NSIndexPath) {
-        // Delete the meme from the shared model
-        getAppDelegate().savedMemes.removeAtIndex(indexPathToDelete.row)
-        // Update our copy of the shared model
-        memes = getAppDelegate().savedMemes
-
-        tableView.deleteRowsAtIndexPaths([indexPathToDelete], withRowAnimation: UITableViewRowAnimation.Left)
-    }
-
     func deleteMemeDetailViewItem() {
         println("In table view, deleteMemeDetailViewItem()")
 
         if let indexPath = detailViewIndexPath {
-            // Reload data in case new memes have been added since the table view was
-            //  last viewed (such as when the user adds a new meme by editing a meme
-            //  from the detail view)
-            reloadTableView()
 
-            updateModelAndDeleteRowFromTableView(memeTableView, indexPathToDelete: indexPath)
+            deleteItemFromModel(indexPath.row)
 
             detailViewIndexPath = nil
 

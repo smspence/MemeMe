@@ -33,6 +33,8 @@ class MemeDetailViewController : UIViewController {
         self.navigationItem.rightBarButtonItem = button
 
         if deletionDelegate == nil {
+            // There is no delegate, so don't show
+            // the toolbar containing the delete button
             deletionToolbar.hidden = true
         }
     }

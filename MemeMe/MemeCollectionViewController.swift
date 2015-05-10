@@ -128,6 +128,18 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         self.addMemeButton.enabled = true
     }
 
+    func updateModelAndDeleteItemsFromCollectionView(collectionView: UICollectionView, indexPathsToDelete: [NSIndexPath]) {
+
+        for indexPath in indexPathsToDelete {
+            // Delete the meme from the shared model
+            getAppDelegate().savedMemes.removeAtIndex(indexPath.item)
+        }
+        // Update our copy of the shared model
+        memes = getAppDelegate().savedMemes
+
+        collectionView.deleteItemsAtIndexPaths(indexPathsToDelete)
+    }
+
     func doDelete() {
         let appDelegate = getAppDelegate()
 
@@ -227,34 +239,15 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         }
     }
 
-    func updateModelAndDeleteItemsFromCollectionView(collectionView: UICollectionView, indexPathsToDelete: [NSIndexPath]) {
-
-        // This line of code seemingly has to be here (when pressing delete from the detail view)
-        //  or else the delete command will fail (app crashes) with complaint of
-        //  "Invalid update: invalid number of items in section 0."
-        //  I have no idea why this line of code fixes it.  It seems like this should have no effect?
-        collectionView.numberOfSections()
-
-        for indexPath in indexPathsToDelete {
-            // Delete the meme from the shared model
-            getAppDelegate().savedMemes.removeAtIndex(indexPath.item)
-        }
-        // Update our copy of the shared model
-        memes = getAppDelegate().savedMemes
-
-        collectionView.deleteItemsAtIndexPaths(indexPathsToDelete)
-    }
-
     func deleteMemeDetailViewItem() {
         println("In collection view, deleteMemeDetailViewItem()")
 
         if let indexPath = detailViewIndexPath {
-            // Reload data in case new memes have been added since the collection view was
-            //  last viewed (such as when the user adds a new meme by editing a meme
-            //  from the detail view)
-            reloadCollectionView()
 
-            updateModelAndDeleteItemsFromCollectionView(memeCollectionView, indexPathsToDelete: [indexPath])
+            // Delete the meme from the shared model
+            getAppDelegate().savedMemes.removeAtIndex(indexPath.item)
+            // Update our copy of the shared model
+            memes = getAppDelegate().savedMemes
 
             detailViewIndexPath = nil
 
