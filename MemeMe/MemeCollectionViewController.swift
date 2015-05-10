@@ -38,28 +38,8 @@ class MemeCollectionViewController : UIViewController, UICollectionViewDataSourc
         memeCollectionView.reloadData()
     }
 
-    // TODO - remove
-    var firstRun = true
-    func getTestMeme() -> Meme {
-        return Meme(topText: "SOME TEXT ABC",
-                    bottomText: "MORE HERE 123",
-                    originalImage: UIImage(named: "myTestImage")!,
-                    memedImage: UIImage(named: "myTestImage")! )
-    }
-    func setUpTestMemes() {
-        for i in 1...8 {
-            getAppDelegate().savedMemes.append(getTestMeme())
-        }
-    }
-
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-
-        // TODO - remove
-        if firstRun && self.getAppDelegate().savedMemes.count == 0 {
-            self.setUpTestMemes()
-            firstRun = false
-        }
 
         reloadCollectionView()
 
